@@ -5,12 +5,12 @@ import { jwtDecode } from "jwt-decode";
 
 const TOKEN_KEY = "token";
 const API_ENDPOINT = `${BASE_URL}/api/auth`;
-const CREDENTIALS = "?username=mohammed&accessCode=qPwtoO";
+//const CREDENTIALS = "?username=mohammed&accessCode=qPwtoO";
 
 axios.defaults.headers.common["x-auth-token"] = getJwt();
 
 async function login(user: UserLogin) {
-  const { data: token } = await axios.post(API_ENDPOINT + CREDENTIALS, user);
+  const { data: token } = await axios.post(API_ENDPOINT + user);
   localStorage.setItem(TOKEN_KEY, token);
   return token;
 }
