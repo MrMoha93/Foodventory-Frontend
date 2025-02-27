@@ -5,6 +5,8 @@ import { z } from "zod";
 import { getCategories, getFood, saveFood } from "@services";
 import { useEffect, useState } from "react";
 import { Category, Food } from "@types";
+import _Input from "@components/common/_Input";
+import { InputField } from "@components/common";
 
 const schema = z.object({
   id: z.string().optional(),
@@ -72,13 +74,14 @@ function FoodFormPage() {
     <div className="p-5">
       <h1>Food Form {id}</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="mb-3 w-50">
-          <label className="form-label">Name</label>
-          <input {...register("name")} className="form-control" />
-          {errors.name && (
-            <p className="text-danger">{errors.name?.message} </p>
-          )}
-        </div>
+        <InputField>
+          <InputField.Label>
+            <i className="fa-solid fa-user" />
+            Name
+          </InputField.Label>
+          <InputField.Input {...register("name")} />
+          <InputField.Error error={errors.name} />
+        </InputField>
         <div className="mb-3 w-50">
           <label className="form-label">Category</label>
           <select {...register("categoryId")} className="form-select">
@@ -90,26 +93,16 @@ function FoodFormPage() {
             ))}
           </select>
         </div>
-        <div className="mb-3 w-50">
-          <label className="form-label">Stock</label>
-          <input
-            {...register("numberInStock", { valueAsNumber: true })}
-            className="form-control"
-          />
-          {errors.numberInStock && (
-            <p className="text-danger">{errors.numberInStock.message} </p>
-          )}
-        </div>
-        <div className="mb-3 w-50">
-          <label className="form-label">Price</label>
-          <input
-            {...register("price", { valueAsNumber: true })}
-            className="form-control"
-          />
-          {errors.price && (
-            <p className="text-danger">{errors.price.message} </p>
-          )}
-        </div>
+        <_Input
+          {...register("numberInStock", { valueAsNumber: true })}
+          label="Stock"
+          error={errors.numberInStock}
+        />
+        <_Input
+          {...register("price", { valueAsNumber: true })}
+          label="Price"
+          error={errors.price}
+        />
         <button className="btn btn-primary" disabled={!isValid}>
           Save
         </button>
