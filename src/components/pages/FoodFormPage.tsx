@@ -22,6 +22,7 @@ const schema = z.object({
     .number()
     .min(1, { message: "Price cannot be higher than 1" })
     .max(100, { message: "Price cannot be higher than 20" }),
+  imageUrl: z.string().min(1, { message: "Image is required" }),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -57,6 +58,7 @@ function FoodFormPage() {
       categoryId: food.category.id,
       numberInStock: food.numberInStock,
       price: food.price,
+      imageUrl: food.imageUrl,
     };
   }
 
@@ -100,6 +102,11 @@ function FoodFormPage() {
           {...register("price", { valueAsNumber: true })}
           label="Price"
           error={errors.price}
+        />
+        <_Input
+          {...register("imageUrl")}
+          label="Image"
+          error={errors.imageUrl}
         />
         <button className="btn btn-primary" disabled={!isValid}>
           Save

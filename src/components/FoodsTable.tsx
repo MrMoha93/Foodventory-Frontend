@@ -1,7 +1,7 @@
 import { Column, Food, SortColumn } from "@types";
 import { Favorite, Table } from "@components/common";
-import { Link } from "react-router-dom";
 import { auth } from "@services";
+import { Link } from "react-router-dom";
 
 interface Props {
   foods: Food[];
@@ -13,8 +13,16 @@ interface Props {
 
 function FoodsTable({ foods, sortColumn, onSort, onDelete, onFavor }: Props) {
   const user = auth.getCurrentUser();
+
   const columns: Column<Food>[] = [
     {
+      key: "image",
+      content: (food) => (
+        <img src={food.imageUrl} alt="product image" width={40} />
+      ),
+    },
+    {
+      key: "name",
       path: "name",
       label: "Name",
       content: (food) => <Link to={`/foods/${food.id}`}>{food.name}</Link>,
