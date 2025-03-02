@@ -2,11 +2,13 @@ import { useNavigate, useParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { getCategories, getFood, saveFood } from "@services";
-import { useEffect, useState } from "react";
-import { Category, Food } from "@types";
+import { saveFood } from "@services";
+import { useEffect } from "react";
+import { Food } from "@types";
 import _Input from "@components/common/_Input";
 import { InputField } from "@components/common";
+import { useGetFood } from "@queries/foods";
+import { useGetCategories } from "@queries/categories";
 
 const schema = z.object({
   id: z.string().optional(),
@@ -26,7 +28,8 @@ type FormData = z.infer<typeof schema>;
 
 function FoodFormPage() {
   const { id } = useParams();
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { data: categories = [] } = useGetCategories();
+  const { data: food, isError, isLoading } = useGetFood(id);
   const navigate = useNavigate();
   const {
     reset,
@@ -39,20 +42,13 @@ function FoodFormPage() {
   });
 
   useEffect(() => {
-    async function fetch() {
-      const { data: categories } = await getCategories();
-      setCategories(categories);
-
-      if (!id || id === "new") return;
-
-      const { data: food } = await getFood(id);
-
-      if (!food) return;
-
-      reset(mapToFormData(food));
+    if (isError) {
+      navigate("/not-found");
+      return;
     }
-    fetch();
-  }, []);
+
+    if (food) reset(mapToFormData(food));
+  }, [food, isError]);
 
   function mapToFormData(food: Food): FormData {
     return {
@@ -69,6 +65,8 @@ function FoodFormPage() {
     await saveFood(data);
     navigate("/foods");
   }
+
+  if (isLoading) return <h1>Loading...</h1>;
 
   return (
     <div className="p-5">

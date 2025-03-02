@@ -3,10 +3,11 @@ import _ from "lodash";
 import { paginate } from "@utils";
 import { Category, SortColumn } from "@types";
 import { ListGroup, Pagination, SearchBox } from "@components/common";
-import { auth, deleteFood } from "@services";
+import { auth } from "@services";
 import { FoodsTable } from "@components";
 import { Link } from "react-router-dom";
-import { useCategories, useFoods } from "@components/hooks";
+import { useDeleteFood, useGetFoods } from "@queries/foods";
+import { useGetCategories } from "@queries/categories";
 
 const DEFAULT_CATEGORY: Category = { id: "", name: "All Categories" };
 const DEFAULT_SORT_COLUMN: SortColumn = { path: "name", order: "asc" };
@@ -14,18 +15,13 @@ const PAGE_SIZE = 4;
 
 function FoodsPage() {
   const [searchQuerry, setSearchQuery] = useState("");
-  const categories = useCategories();
-  const { foods, setFoods } = useFoods();
+  const { data: categories = [] } = useGetCategories();
+  const { data: foods = [] } = useGetFoods();
+  const { mutate: handleDelete } = useDeleteFood();
   const [selectedPage, setSelectedPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_CATEGORY);
   const [sortColumn, setSortColumn] = useState(DEFAULT_SORT_COLUMN);
   const user = auth.getCurrentUser();
-
-  async function handleDelete(id: string) {
-    const newFoods = foods.filter((food) => food.id !== id);
-    setFoods(newFoods);
-    await deleteFood(id);
-  }
 
   function handleFavor(id: string) {
     const newFoods = foods.map((food) => {
@@ -34,9 +30,9 @@ function FoodsPage() {
       }
       return food;
     });
-    setFoods(newFoods);
+    console.log(newFoods);
+    //setFoods(newFoods);
   }
-
   function handleCategorySelect(category: Category) {
     setSelectedCategory(category);
     setSearchQuery("");
