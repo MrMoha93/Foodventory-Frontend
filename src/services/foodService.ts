@@ -8,6 +8,7 @@ interface FoodFormData {
   categoryId: string;
   numberInStock: number;
   price: number;
+  imageUrl: string;
 }
 
 const API_ENDPOINT = `${BASE_URL}/api/foods`;

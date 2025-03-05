@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { saveFood } from "@services";
+import { clourdinary, saveFood } from "@services";
 import { useEffect } from "react";
 import { Food } from "@types";
 import _Input from "@components/common/_Input";
@@ -22,7 +22,25 @@ const schema = z.object({
     .number()
     .min(1, { message: "Price cannot be higher than 1" })
     .max(100, { message: "Price cannot be higher than 20" }),
-  imageUrl: z.string().min(1, { message: "Image is required" }),
+  images: z
+    .instanceof(FileList)
+    .refine(
+      (fileList) => {
+        if (!fileList || fileList.length === 0) return true;
+        return ["image/png", "image/jpg"].includes(fileList[0].type);
+      },
+      { message: "Only PNG/JPG images are allowed" }
+    )
+    .refine(
+      (fileList) => {
+        if (!fileList || fileList.length === 0) return true;
+        return fileList[0].size <= 5_000_000;
+      },
+      {
+        message: "Maximum file size allowed is 5 MB",
+      }
+    )
+    .optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -58,13 +76,19 @@ function FoodFormPage() {
       categoryId: food.category.id,
       numberInStock: food.numberInStock,
       price: food.price,
-      imageUrl: food.imageUrl,
     };
   }
 
-  async function onSubmit(data: FormData) {
+  async function onSubmit({ images, ...data }: FormData) {
     console.log("data", data);
-    await saveFood(data);
+
+    let imageUrl = food?.imageUrl || "";
+
+    if (images && images.length > 0) {
+      imageUrl = await clourdinary.saveImage(images[0]);
+    }
+
+    await saveFood({ ...data, imageUrl });
     navigate("/foods");
   }
 
@@ -103,10 +127,14 @@ function FoodFormPage() {
           label="Price"
           error={errors.price}
         />
+        {food?.imageUrl && (
+          <img src={food.imageUrl} alt={food.name} width={80} />
+        )}
         <_Input
-          {...register("imageUrl")}
-          label="Image"
-          error={errors.imageUrl}
+          type="file"
+          {...register("images")}
+          label={food?.imageUrl ? "Change Image" : "Image"}
+          error={errors.images}
         />
         <button className="btn btn-primary" disabled={!isValid}>
           Save
